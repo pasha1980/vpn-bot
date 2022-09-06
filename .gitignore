@@ -1,5 +1,8 @@
 .idea
 
+build/dev/db
+build/dev/session
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
