@@ -21,4 +21,6 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Domain/Entity'
+            - '../src/Domain/Exceptions'
             - '../src/Service/Telegram/TelegramScript.php'
+            - '../src/Repository/SessionRepository.php'
