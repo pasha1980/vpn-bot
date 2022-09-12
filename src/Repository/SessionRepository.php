@@ -20,7 +20,7 @@ class SessionRepository
 
         $data = $connection->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
 
-        if ($data === '') {
+        if ($data == '') {
             return null;
         }
 
