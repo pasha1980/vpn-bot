@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Domain\Entity\TelegramQuery;
+use App\Domain\Entity\Query;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 class SessionRepository
@@ -26,7 +26,7 @@ class SessionRepository
         );
     }
 
-    public static function getPreviousQuery(int $chatId): ?TelegramQuery
+    public static function getPreviousQuery(int $chatId): ?Query
     {
         $data = self::$queryConn->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
 
@@ -34,10 +34,10 @@ class SessionRepository
             return null;
         }
 
-        return TelegramQuery::fromJson($data);
+        return Query::fromJson($data);
     }
 
-    public static function saveQuery(TelegramQuery $query): void
+    public static function saveQuery(Query $query): void
     {
         self::$queryConn->set(
             sprintf(self::REDIS_QUERY_KEY_FORMAT, $query->chatId),
@@ -59,7 +59,7 @@ class SessionRepository
 
     }
 
-    public static function getQueryData(TelegramQuery $query): array
+    public static function getQueryData(Query $query): array
     {
         $data = self::$queryConn->get(
             sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash())
@@ -67,7 +67,7 @@ class SessionRepository
         return json_decode(base64_decode($data), true);
     }
 
-    public static function saveQueryData(TelegramQuery $query, array $data = []): void
+    public static function saveQueryData(Query $query, array $data = []): void
     {
         self::$queryConn->set(
             sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash()),

@@ -4,11 +4,11 @@ namespace App\Domain\Entity;
 
 use App\Repository\SessionRepository;
 
-class TelegramQuery
+class Query
 {
     public int $id;
 
-    public TelegramUser $user;
+    public User $user;
 
     public int $chatId;
 
@@ -26,7 +26,7 @@ class TelegramQuery
 
         $query = new self;
         $query->id = $message['message_id'];
-        $query->user = TelegramUser::fromTgParams($params);
+        $query->user = User::fromTgParams($params);
         $query->chatId = $message['chat']['id'];
         $query->message = str_replace('\\', '', $message['text']);
         $query->isInit = str_starts_with($query->message, '/');
@@ -64,7 +64,7 @@ class TelegramQuery
         $query->chatId = $array['chatId'];
         $query->message = $array['message'];
         $query->isInit = (bool)$array['isInit'];
-        $query->user = TelegramUser::fromArray($array['user']);
+        $query->user = User::fromArray($array['user']);
 
         if (isset($array['previousQuery'])) {
             $query->previousQuery = self::fromArray($array['previousQuery']);

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entity;
 
-class TelegramMessage
+class Message
 {
     public function __construct(int $chatId, string $message = '')
     {

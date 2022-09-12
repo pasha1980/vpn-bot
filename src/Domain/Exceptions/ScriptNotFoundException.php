@@ -2,9 +2,9 @@
 
 namespace App\Domain\Exceptions;
 
-use App\Domain\Entity\TelegramMessage;
+use App\Domain\Entity\Message;
 
-class ScriptNotFoundException extends BaseTelegramException
+class ScriptNotFoundException extends BaseException
 {
     public function __construct(int $chatId, ?string $message = null)
     {
@@ -12,6 +12,6 @@ class ScriptNotFoundException extends BaseTelegramException
             $message = 'Script Not Found';
         }
 
-        parent::__construct(new TelegramMessage($chatId, $message));
+        parent::__construct(new Message($chatId, $message));
     }
 }

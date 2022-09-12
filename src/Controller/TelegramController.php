@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Domain\Entity\TelegramQuery;
-use App\Exception\AccessDeniedException;
-use App\Exception\BaseException;
+use App\Domain\Entity\Query;
+use App\Exception\AccessDeniedHttpException;
+use App\Exception\BaseHttpException;
 use App\Service\Telegram\TelegramService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,12 +28,12 @@ class TelegramController
         try {
             $this->validatePermissions($request);
 
-            $query = TelegramQuery::fromTgParams(
+            $query = Query::fromTgParams(
                 json_decode($request->getContent(), true)
             );
 
             $this->userAreaTgService->handle($query);
-        } catch (BaseException $exception) {
+        } catch (BaseHttpException $exception) {
             return new Response($exception->getMessage());
         }
 
@@ -45,7 +45,7 @@ class TelegramController
         $header = $request->headers->get('x-telegram-bot-api-secret-token');
         $secret = $_ENV['TG_SECRET'] ?? '';
         if ($secret !== $header) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedHttpException();
         }
     }
 }

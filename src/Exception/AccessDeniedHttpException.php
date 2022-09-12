@@ -2,7 +2,7 @@
 
 namespace App\Exception;
 
-class AccessDeniedException extends BaseException
+class AccessDeniedHttpException extends BaseHttpException
 {
     protected $message = 'Access denied';
 }

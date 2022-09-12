@@ -2,16 +2,15 @@
 
 namespace App\Service\Telegram;
 
-use App\Domain\Entity\TelegramMessage;
-use App\Domain\Entity\TelegramQuery;
-use App\Domain\Exceptions\BaseTelegramException;
+use App\Domain\AbstractScript;
+use App\Domain\Entity\Message;
+use App\Domain\Entity\Query;
+use App\Domain\Exceptions\BaseException;
 use App\Domain\Exceptions\ScriptNotFoundException;
-use App\Domain\TelegramScriptInterface;
-use App\Exception\ProcessedQueryException;
+use App\Exception\ProcessedQueryHttpException;
 use App\Kernel;
 use App\Repository\SessionRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -32,28 +31,31 @@ class TelegramService
         $this->rootDir = $kernel->getProjectDir();
     }
 
-    public function handle(TelegramQuery $query): void
+    public function handle(Query $query): void
     {
         $processedQueries = SessionRepository::getProcessedQueries();
         if (in_array($query->id, $processedQueries)) {
-            throw new ProcessedQueryException();
+            throw new ProcessedQueryHttpException();
         }
 
         try {
-            $this->logger->debug('Got query', ['obj' => $query]);
+            $this->logger->debug('Got query', [
+                'query' => $query,
+                'user' => $query->user
+            ]);
 
             $handler = $this->getHandler($query);
             if ($handler !== null) {
                 $handler($query);
             }
-        } catch (BaseTelegramException $exception) {
+        } catch (BaseException $exception) {
             $this->send($exception->tgMessage);
         }
 
         SessionRepository::addProcessedQueries($query->id);
     }
 
-    public function send(TelegramMessage $message): void
+    public function send(Message $message): void
     {
         try {
             (new Api($_ENV['TG_TOKEN']))->sendMessage([
@@ -73,7 +75,7 @@ class TelegramService
         ]);
     }
 
-    private function getHandler(TelegramQuery $query): ?callable
+    private function getHandler(Query $query): ?callable
     {
         $path = $this->rootDir . '/src/Domain/Scripts';
         $finder = new Finder();
@@ -89,7 +91,7 @@ class TelegramService
                 continue;
             }
 
-            if (!in_array(TelegramScriptInterface::class, $reflection->getInterfaceNames())) {
+            if (AbstractScript::class != $reflection->getParentClass()->getName()) {
                 continue;
             }
 
@@ -98,7 +100,7 @@ class TelegramService
             }
 
             $container = $this->container;
-            return function (TelegramQuery $query) use ($class, $container) {
+            return function (Query $query) use ($class, $container) {
                 $script = $container->get($class);
                 $script->handle($query);
             };

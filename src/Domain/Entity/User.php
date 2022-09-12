@@ -2,9 +2,9 @@
 
 namespace App\Domain\Entity;
 
-use App\Exception\AccessDeniedException;
+use App\Exception\AccessDeniedHttpException;
 
-class TelegramUser
+class User
 {
     public int $id;
 
@@ -21,7 +21,7 @@ class TelegramUser
         $userParams = $params['message']['from'];
 
         if ($userParams['is_bot']) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedHttpException();
         }
 
         $user = new self;

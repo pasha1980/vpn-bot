@@ -2,24 +2,20 @@
 
 namespace App\Domain\Scripts;
 
-use App\Domain\Entity\TelegramMessage;
-use App\Domain\Entity\TelegramQuery;
-use App\Domain\TelegramScriptInterface;
+use App\Domain\AbstractScript;
+use App\Domain\Entity\Message;
+use App\Domain\Entity\Query;
 use App\Service\Telegram\TelegramScript;
-use App\Service\Telegram\TelegramScriptTrait;
-use App\Service\Telegram\TelegramService;
 
 /**
  * @TelegramScript(command="/start")
  */
-class StartScript implements TelegramScriptInterface
+class StartScript extends AbstractScript
 {
-    use TelegramScriptTrait;
-
-    public function handle(TelegramQuery $query): void
+    public function handle(Query $query): void
     {
         $this->send(
-            new TelegramMessage($query->chatId, 'Hello, ' . $query->user->userName . '!')
+            new Message($query->chatId, 'Hello, ' . $query->user->userName . '!')
         );
     }
 }

@@ -4,7 +4,7 @@ namespace App\Exception;
 
 use JetBrains\PhpStorm\Internal\LanguageLevelTypeAware;
 
-class BaseException extends \Exception
+class BaseHttpException extends \Exception
 {
     public function __construct(string $message = "")
     {

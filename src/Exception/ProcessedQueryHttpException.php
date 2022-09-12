@@ -2,7 +2,7 @@
 
 namespace App\Exception;
 
-class ProcessedQueryException extends BaseException
+class ProcessedQueryHttpException extends BaseHttpException
 {
     protected $message = 'Query already processed';
 }
