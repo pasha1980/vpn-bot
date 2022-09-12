@@ -29,7 +29,7 @@ class TelegramService
         try {
             (new Api($_ENV['TG_TOKEN']))->sendMessage([
                 'chat_id' => $message->chatId,
-                'text' => $message->chatId
+                'text' => $message->message
             ]);
         } catch (TelegramSDKException $exception) {
             return;
