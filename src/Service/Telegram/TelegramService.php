@@ -5,16 +5,19 @@ namespace App\Service\Telegram;
 use App\Domain\Entity\TelegramMessage;
 use App\Domain\Entity\TelegramQuery;
 use App\Domain\StartScript;
-use Symfony\Component\DependencyInjection\Container;
+use App\Kernel;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
 class TelegramService
 {
-    public function __construct(
-        private readonly Container $container
-    )
-    {}
+    private readonly ContainerInterface $container;
+
+    public function __construct(Kernel $kernel)
+    {
+        $this->container = $kernel->getContainer();
+    }
 
     public function handle(TelegramQuery $query): void
     {
