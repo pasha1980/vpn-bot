@@ -12,13 +12,17 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
 
 abstract class AbstractScript
 {
+    protected Kernel $kernel;
     protected ContainerInterface $container;
+    protected LoggerInterface $logger;
 
     public function __construct(
         Kernel $kernel,
-        protected readonly LoggerInterface $logger
+        LoggerInterface $logger
     ){
+        $this->kernel = $kernel;
         $this->container = $kernel->getContainer();
+        $this->logger = $logger;
     }
 
     protected function send(Message $message): void
