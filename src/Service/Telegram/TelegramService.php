@@ -4,6 +4,7 @@ namespace App\Service\Telegram;
 
 use App\Domain\Entity\TelegramMessage;
 use App\Domain\Entity\TelegramQuery;
+use App\Domain\Exceptions\BaseTelegramException;
 use App\Domain\TelegramScriptInterface;
 use App\Exception\ProcessedQueryException;
 use App\Kernel;
@@ -32,9 +33,13 @@ class TelegramService
             throw new ProcessedQueryException();
         }
 
-        $function = $this->getHandlerFunc($query);
-        if ($function !== null) {
-            $function($query);
+        try {
+            $function = $this->getHandlerFunc($query);
+            if ($function !== null) {
+                $function($query);
+            }
+        } catch (BaseTelegramException $exception) {
+            self::send($exception->tgMessage);
         }
 
         SessionRepository::addProcessedQueries($query->id);

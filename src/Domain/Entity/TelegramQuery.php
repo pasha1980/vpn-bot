@@ -16,6 +16,8 @@ class TelegramQuery
 
     public bool $isInit = false;
 
+    public ?string $uniqueHash = null;
+
     public ?self $previousQuery = null;
 
     public static function fromTgParams(array $params): self
@@ -31,9 +33,21 @@ class TelegramQuery
 
         if (!$query->isInit) {
             $query->previousQuery = SessionRepository::getPreviousQuery($query->chatId);
+        } else {
+            $query->uniqueHash = self::generateHash($query);
         }
 
         return $query;
+    }
+
+    private static function generateHash(self $query): string
+    {
+        return hash('sha256', $query->chatId ?? 0 . $query->user->userName . bin2hex(random_bytes(5)));
+    }
+
+    public function getHash(): string
+    {
+        return $this->getInitialQuery()->uniqueHash;
     }
 
     public static function fromJson(string $json): self
@@ -92,4 +106,6 @@ class TelegramQuery
 
         return $this;
     }
+
+
 }

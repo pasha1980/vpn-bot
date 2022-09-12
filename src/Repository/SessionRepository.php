@@ -11,6 +11,7 @@ class SessionRepository
 
     private const REDIS_QUERY_KEY_FORMAT = 'telegram_query_chat_%s';
     private const REDIS_PROCESSED_QUERY_KEY = 'telegram_processed_query';
+    private const REDIS_ADDITIONAL_DATA_KEY_FORMAT = 'telegram_additional_query_data_%s';
     private const REDIS_QUERY_DATABASE = 1;
 
     /**
@@ -56,6 +57,22 @@ class SessionRepository
         $processedQueries[] = $queryId;
         self::$queryConn->set(self::REDIS_PROCESSED_QUERY_KEY, json_encode($processedQueries));
 
+    }
+
+    public static function getQueryData(TelegramQuery $query): array
+    {
+        $data = self::$queryConn->get(
+            sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash())
+        );
+        return json_decode(base64_decode($data), true);
+    }
+
+    public static function saveQueryData(TelegramQuery $query, array $data = []): void
+    {
+        self::$queryConn->set(
+            sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash()),
+            base64_encode(json_encode($data))
+        );
     }
 }
 SessionRepository::__constructStatic();
