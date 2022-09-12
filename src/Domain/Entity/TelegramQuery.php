@@ -28,7 +28,7 @@ class TelegramQuery
         $query->id = $message['message_id'];
         $query->user = TelegramUser::fromTgParams($params);
         $query->chatId = $message['chat']['id'];
-        $query->message = $message['text'];
+        $query->message = str_replace('\\', '', $message['text']);
         $query->isInit = str_starts_with($query->message, '/');
 
         if (!$query->isInit) {
