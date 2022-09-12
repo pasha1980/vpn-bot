@@ -30,7 +30,7 @@ class TelegramQuery
         $query->isInit = str_starts_with($query->message, '/');
 
         if (!$query->isInit) {
-            $query->previousQuery = SessionRepository::getPreviousQueryTrace($query->chatId);
+            $query->previousQuery = SessionRepository::getPreviousQuery($query->chatId);
         }
 
         return $query;
