@@ -23,4 +23,5 @@ services:
             - '../src/Domain/Entity'
             - '../src/Domain/Exceptions'
             - '../src/Service/Telegram/TelegramScript.php'
+            - '../src/Service/Telegram/TelegramScriptTrait.php'
             - '../src/Repository/SessionRepository.php'

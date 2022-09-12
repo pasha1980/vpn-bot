@@ -5,11 +5,14 @@ namespace App\Service\Telegram;
 use App\Domain\Entity\TelegramMessage;
 use App\Domain\Entity\TelegramQuery;
 use App\Domain\Exceptions\BaseTelegramException;
+use App\Domain\Exceptions\ScriptNotFoundException;
 use App\Domain\TelegramScriptInterface;
 use App\Exception\ProcessedQueryException;
 use App\Kernel;
 use App\Repository\SessionRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Telegram\Bot\Api;
@@ -20,7 +23,10 @@ class TelegramService
     private readonly ContainerInterface $container;
     private readonly string $rootDir;
 
-    public function __construct(Kernel $kernel)
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        Kernel $kernel
+    )
     {
         $this->container = $kernel->getContainer();
         $this->rootDir = $kernel->getProjectDir();
@@ -34,18 +40,20 @@ class TelegramService
         }
 
         try {
-            $function = $this->getHandlerFunc($query);
-            if ($function !== null) {
-                $function($query);
+            $this->logger->debug('Got query', ['obj' => $query]);
+
+            $handler = $this->getHandler($query);
+            if ($handler !== null) {
+                $handler($query);
             }
         } catch (BaseTelegramException $exception) {
-            self::send($exception->tgMessage);
+            $this->send($exception->tgMessage);
         }
 
         SessionRepository::addProcessedQueries($query->id);
     }
 
-    public static function send(TelegramMessage $message): void
+    public function send(TelegramMessage $message): void
     {
         try {
             (new Api($_ENV['TG_TOKEN']))->sendMessage([
@@ -53,12 +61,19 @@ class TelegramService
                 'text' => $message->message
             ]);
         } catch (TelegramSDKException $exception) {
+            $this->logger->debug('Error while sending message', [
+                'exception' => $exception
+            ]);
+
             return;
         }
 
+        $this->logger->debug('Sent message', [
+            'message' => $message
+        ]);
     }
 
-    private function getHandlerFunc(TelegramQuery $query): ?callable
+    private function getHandler(TelegramQuery $query): ?callable
     {
         $path = $this->rootDir . '/src/Domain/Scripts';
         $finder = new Finder();
@@ -78,7 +93,7 @@ class TelegramService
                 continue;
             }
 
-            if ($annotation->command !== $query->getInitialQuery()->message) {
+            if ($annotation->command != $query->getInitialQuery()->message) {
                 continue;
             }
 
@@ -89,6 +104,6 @@ class TelegramService
             };
         }
 
-        return null;
+        throw new ScriptNotFoundException($query->chatId);
     }
 }
