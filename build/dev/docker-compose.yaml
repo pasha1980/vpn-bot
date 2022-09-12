@@ -1,7 +1,7 @@
 version: '3'
 services:
   bot:
-    image: registry.gitlab.com/khvalygin/tgvpn-bot:latest
+    image: registry.gitlab.com/khvalygin/tgvpn/user-bot:latest
     restart: unless-stopped
     container_name: tgvpn-bot
     build:
