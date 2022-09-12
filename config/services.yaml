@@ -21,3 +21,4 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Domain/Entity'
+            - '../src/Service/Telegram/TelegramScript.php'

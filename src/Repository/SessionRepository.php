@@ -10,15 +10,24 @@ class SessionRepository
     private const REDIS_DNS_FORMAT = 'redis://%s/%s';
 
     private const REDIS_QUERY_KEY_FORMAT = 'telegram_query_chat_%s';
+    private const REDIS_PROCESSED_QUERY_KEY = 'telegram_processed_query';
     private const REDIS_QUERY_DATABASE = 1;
+
+    /**
+     * @var \Redis $queryConn
+     */
+    private static $queryConn;
+
+    public static function __constructStatic()
+    {
+        self::$queryConn = RedisAdapter::createConnection(
+            sprintf(self::REDIS_DNS_FORMAT, $_ENV['SESSION_HOST'], self::REDIS_QUERY_DATABASE)
+        );
+    }
 
     public static function getPreviousQuery(int $chatId): ?TelegramQuery
     {
-        $connection = RedisAdapter::createConnection(
-            sprintf(self::REDIS_DNS_FORMAT, $_ENV['SESSION_HOST'], self::REDIS_QUERY_DATABASE)
-        );
-
-        $data = $connection->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
+        $data = self::$queryConn->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
 
         if ($data == '') {
             return null;
@@ -29,12 +38,24 @@ class SessionRepository
 
     public static function saveQuery(TelegramQuery $query): void
     {
-        RedisAdapter::createConnection(
-            sprintf(self::REDIS_DNS_FORMAT, $_ENV['SESSION_HOST'], self::REDIS_QUERY_DATABASE)
-        )
-            ->set(
-                sprintf(self::REDIS_QUERY_KEY_FORMAT, $query->chatId),
-                $query->toJson()
-            );
+        self::$queryConn->set(
+            sprintf(self::REDIS_QUERY_KEY_FORMAT, $query->chatId),
+            $query->toJson()
+        );
+    }
+
+    public static function getProcessedQueries(): array
+    {
+        $data = self::$queryConn->get(self::REDIS_PROCESSED_QUERY_KEY);
+        return array_values(json_decode($data, true) ?? []);
+    }
+
+    public static function addProcessedQueries(int $queryId): void
+    {
+        $processedQueries = self::getProcessedQueries();
+        $processedQueries[] = $queryId;
+        self::$queryConn->set(self::REDIS_PROCESSED_QUERY_KEY, json_encode($processedQueries));
+
     }
 }
+SessionRepository::__constructStatic();
