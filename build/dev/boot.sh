@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/usr/local/bin/wait-for-it db:3306
+/usr/local/bin/wait-for-it database:3306
 
 /var/www/app/bin/console cache:clear
 /var/www/app/bin/console doctrine:schema:update --force --dump-sql

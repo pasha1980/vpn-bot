@@ -1,50 +1,7 @@
 version: '3'
 services:
   bot:
-    image: registry.gitlab.com/khvalygin/tgvpn/user-bot:latest
-    restart: unless-stopped
-    container_name: tgvpn-bot
+    image: registry.gitlab.com/khvalygin/tg-vpn-admin-bot/dev:latest
     build:
       context: ../..
       dockerfile: build/dev/Dockerfile
-    environment:
-      DATABASE_URL: mysql://root:password@tgvpn-db:3306/tgvpn
-      SESSION_HOST: tgvpn-session:6379
-    ports:
-      - "127.0.0.1:8080:80"
-    depends_on:
-      - db
-      - session
-    networks:
-      - tgvpn-internal
-
-  db:
-    image: mysql:5.7
-    restart: always
-    container_name: tgvpn-db
-    environment:
-      MYSQL_DATABASE: tgvpn
-      MYSQL_ROOT_PASSWORD: password
-    ports:
-      - "127.0.0.1:3310:3306"
-    volumes:
-      - ./db/mysql:/var/lib/mysql:rw
-      - ./db/mysql-log:/var/log
-    networks:
-      - tgvpn-internal
-
-  session:
-    image: redis:7.0.0-alpine
-    restart: always
-    command: redis-server --appendonly yes
-    container_name: tgvpn-session
-    ports:
-      - "127.0.0.1:6380:6379"
-    volumes:
-      - ./session/data:/data
-    networks:
-      - tgvpn-internal
-
-networks:
-  tgvpn-internal:
-    driver: "bridge"
