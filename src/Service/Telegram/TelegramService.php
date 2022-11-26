@@ -9,7 +9,7 @@ use App\Domain\Exceptions\BaseException;
 use App\Domain\Exceptions\ScriptNotFoundException;
 use App\Exception\ProcessedQueryHttpException;
 use App\Kernel;
-use App\Repository\SessionRepository;
+use App\Repository\TgSessionRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -33,7 +33,7 @@ class TelegramService
 
     public function handle(Query $query): void
     {
-        $processedQueries = SessionRepository::getProcessedQueries();
+        $processedQueries = TgSessionRepository::getProcessedQueries();
         if (in_array($query->id, $processedQueries)) {
             throw new ProcessedQueryHttpException();
         }
@@ -52,7 +52,7 @@ class TelegramService
             $this->send($exception->tgMessage);
         }
 
-        SessionRepository::addProcessedQueries($query->id);
+        TgSessionRepository::addProcessedQueries($query->id);
     }
 
     public function send(Message $message): void

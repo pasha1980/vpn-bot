@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Domain\Entity\Query;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
-class SessionRepository
+class TgSessionRepository
 {
     private const REDIS_DNS_FORMAT = 'redis://%s/%s';
 
@@ -75,4 +75,4 @@ class SessionRepository
         );
     }
 }
-SessionRepository::__constructStatic();
+TgSessionRepository::__constructStatic();

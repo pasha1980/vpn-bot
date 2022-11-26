@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entity;
 
-use App\Repository\SessionRepository;
+use App\Repository\TgSessionRepository;
 
 class Query
 {
@@ -32,7 +32,7 @@ class Query
         $query->isInit = str_starts_with($query->message, '/');
 
         if (!$query->isInit) {
-            $query->previousQuery = SessionRepository::getPreviousQuery($query->chatId);
+            $query->previousQuery = TgSessionRepository::getPreviousQuery($query->chatId);
         } else {
             $query->uniqueHash = self::generateHash($query);
         }
