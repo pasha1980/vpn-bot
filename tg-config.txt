@@ -1,0 +1,13 @@
+1. Create bot
+2. Copy bot-token to TG_TOKEN
+3. Generate random string
+4. Set bot webhook
+
+POST
+https://api.telegram.org/bot${TG_TOKEN}/setWebhook
+{
+   "url": $URL
+   "secret_token": $RANDOM_STRING
+}
+
+5. Copy the string to TG_SECRET
