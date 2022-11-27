@@ -15,20 +15,24 @@ class TgSessionRepository
     private const REDIS_QUERY_DATABASE = 1;
 
     /**
-     * @var \Redis $queryConn
+     * @var \Redis $connection
      */
-    private static $queryConn;
+    private static $connection;
 
-    public static function __constructStatic()
+    private static function connection()
     {
-        self::$queryConn = RedisAdapter::createConnection(
-            sprintf(self::REDIS_DNS_FORMAT, $_ENV['SESSION_HOST'], self::REDIS_QUERY_DATABASE)
-        );
+        if (self::$connection == null) {
+            self::$connection = RedisAdapter::createConnection(
+                sprintf(self::REDIS_DNS_FORMAT, $_ENV['SESSION_HOST'], self::REDIS_QUERY_DATABASE)
+            );
+        }
+
+        return self::$connection;
     }
 
     public static function getPreviousQuery(int $chatId): ?Query
     {
-        $data = self::$queryConn->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
+        $data = self::connection()->get(sprintf(self::REDIS_QUERY_KEY_FORMAT, $chatId));
 
         if ($data == '') {
             return null;
@@ -39,7 +43,7 @@ class TgSessionRepository
 
     public static function saveQuery(Query $query): void
     {
-        self::$queryConn->set(
+        self::connection()->set(
             sprintf(self::REDIS_QUERY_KEY_FORMAT, $query->chatId),
             $query->toJson()
         );
@@ -47,7 +51,7 @@ class TgSessionRepository
 
     public static function getProcessedQueries(): array
     {
-        $data = self::$queryConn->get(self::REDIS_PROCESSED_QUERY_KEY);
+        $data = self::connection()->get(self::REDIS_PROCESSED_QUERY_KEY);
         return array_values(json_decode($data, true) ?? []);
     }
 
@@ -55,13 +59,13 @@ class TgSessionRepository
     {
         $processedQueries = self::getProcessedQueries();
         $processedQueries[] = $queryId;
-        self::$queryConn->set(self::REDIS_PROCESSED_QUERY_KEY, json_encode($processedQueries));
+        self::connection()->set(self::REDIS_PROCESSED_QUERY_KEY, json_encode($processedQueries));
 
     }
 
     public static function getQueryData(Query $query): array
     {
-        $data = self::$queryConn->get(
+        $data = self::connection()->get(
             sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash())
         );
         return json_decode(base64_decode($data), true);
@@ -69,10 +73,9 @@ class TgSessionRepository
 
     public static function saveQueryData(Query $query, array $data = []): void
     {
-        self::$queryConn->set(
+        self::connection()->set(
             sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash()),
             base64_encode(json_encode($data))
         );
     }
 }
-TgSessionRepository::__constructStatic();
