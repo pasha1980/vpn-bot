@@ -31,7 +31,7 @@ class Order extends BaseEntity
 
     /**
      * @var Instance
-     * @ORM\ManyToOne(targetEntity=Server::class)
+     * @ORM\ManyToOne(targetEntity=Instance::class)
      */
     public Instance $server;
 

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -23,15 +24,15 @@ class BaseEntity
     /**
      * @ORM\Column(type="datetime")
      */
-    public DateTime $createdAt;
+    public DateTimeInterface $createdAt;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    public DateTime $updatedAt;
+    public DateTimeInterface $updatedAt;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    public ?DateTime $deletedAt;
+    public ?DateTimeInterface $deletedAt;
 }
