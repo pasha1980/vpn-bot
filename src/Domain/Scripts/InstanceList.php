@@ -27,18 +27,37 @@ class InstanceList extends AbstractScript
 
     public function handle(Query $query): void
     {
-        $activeInstances = $this->em->getRepository(Instance::class)->findBy([
-            'isActive' => true
-        ]);
+        /** @var Instance[] $instances */
+        $instances = $this->em->getRepository(Instance::class)->findAll();
 
-        if (count($activeInstances) == 0) {
+        if (count($instances) == 0) {
             $this->send(
-                new Message($query->chatId, 'No active instances found :(')
+                new Message($query->chatId, 'No instances found :(')
             );
             return;
         }
 
-        foreach ($activeInstances as $instance) {
+        $this->send(
+            new Message($query->chatId, 'Active instances:')
+        );
+        foreach ($instances as $instance) {
+            if (!$instance->isActive) {
+                continue;
+            }
+
+            $this->send(
+                new Message($query->chatId, $this->format($instance))
+            );
+        }
+
+        $this->send(
+            new Message($query->chatId, 'Inactive instances:')
+        );
+        foreach ($instances as $instance) {
+            if ($instance->isActive) {
+                continue;
+            }
+
             $this->send(
                 new Message($query->chatId, $this->format($instance))
             );
@@ -51,6 +70,7 @@ class InstanceList extends AbstractScript
     Country: %s
     Region: %s
     City: %s
+    Version: %s
     ';
 
     private function format(Instance $instance): string
@@ -60,7 +80,8 @@ class InstanceList extends AbstractScript
             $instance->ip,
             $instance->country,
             $instance->region,
-            $instance->city
+            $instance->city,
+            $instance->version
         );
     }
 }
