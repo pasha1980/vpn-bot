@@ -35,4 +35,19 @@ class Instance extends BaseEntity
      * @ORM\Column()
      */
     public string $ip;
+
+    /**
+     * @ORM\Column()
+     */
+    public string $version;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private string $availableServices;
+
+    public function getAvailableServices(): array
+    {
+        return \GuzzleHttp\json_decode($this->availableServices, true);
+    }
 }
