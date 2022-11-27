@@ -30,10 +30,10 @@ class Order extends BaseEntity
     public User $user;
 
     /**
-     * @var Server
+     * @var Instance
      * @ORM\ManyToOne(targetEntity=Server::class)
      */
-    public Server $server;
+    public Instance $server;
 
     /**
      * @var int

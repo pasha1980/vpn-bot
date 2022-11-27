@@ -10,9 +10,9 @@ use App\Service\Telegram\TelegramScript;
 use Psr\Log\LoggerInterface;
 
 /**
- * @TelegramScript(command="/start")
+ * @TelegramScript(command="/ping")
  */
-class StartScript extends AbstractScript
+class Ping extends AbstractScript
 {
     public function __construct(
         Kernel $kernel,
@@ -25,7 +25,7 @@ class StartScript extends AbstractScript
     public function handle(Query $query): void
     {
         $this->send(
-            new Message($query->chatId, 'Hello, ' . $query->user->userName . '!')
+            new Message($query->chatId, 'PONG')
         );
     }
 }

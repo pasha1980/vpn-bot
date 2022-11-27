@@ -6,8 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
+ * @ORM\Table(name="instances")
  */
-class Server extends BaseEntity
+class Instance extends BaseEntity
 {
     /**
      * @ORM\Column(nullable=true)
@@ -17,7 +18,18 @@ class Server extends BaseEntity
     /**
      * @ORM\Column(nullable=true)
      */
-    public ?string $town;
+    public ?string $region;
+
+    /**
+     * @ORM\Column(nullable=true)
+     */
+    public ?string $city;
+
+    /**
+     * @var bool
+     * @ORM\Column(name="is_active")
+     */
+    public bool $isActive;
 
     /**
      * @ORM\Column()
