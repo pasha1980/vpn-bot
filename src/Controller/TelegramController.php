@@ -19,7 +19,7 @@ class TelegramController
     #[
         Route(
             path: "/telegram",
-            name: 'main',
+            name: 'telegram-main',
             methods: ["POST"]
         )
     ]

@@ -20,7 +20,7 @@ class TotalIncome extends AbstractScript
     public function __construct(
         Kernel                         $kernel,
         LoggerInterface                $logger,
-        private EntityManagerInterface $em
+        private readonly EntityManagerInterface $em
     )
     {
         parent::__construct($kernel, $logger);
@@ -28,12 +28,12 @@ class TotalIncome extends AbstractScript
 
     public function handle(Query $query): void
     {
-        $income = $this->em->createQueryBuilder()
-            ->select('sum(p.price)')
+        $income = (float)$this->em->createQueryBuilder()
+            ->select('sum(p.price) as income')
             ->from(Payment::class, 'p')
             ->where('p.status = :status_success')
             ->setParameter('status_success', PaymentStatus::success)
-            ->getQuery()->getResult();
+            ->getQuery()->getResult()[0]['income'];
 
         $this->send(
             new Message($query->chatId, $income)
