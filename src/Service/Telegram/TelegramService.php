@@ -24,7 +24,7 @@ class TelegramService
 
     public function __construct(
         private readonly LoggerInterface $logger,
-        Kernel $kernel
+        Kernel  $kernel
     )
     {
         $this->container = $kernel->getContainer();
@@ -33,6 +33,10 @@ class TelegramService
 
     public function handle(Query $query): void
     {
+        if (!$this->additionalPermissionCheck($query)) {
+            return;
+        }
+
         $processedQueries = TgSessionRepository::getProcessedQueries();
         if (in_array($query->id, $processedQueries)) {
             throw new ProcessedQueryHttpException();
@@ -53,6 +57,16 @@ class TelegramService
         }
 
         TgSessionRepository::addProcessedQueries($query->id);
+    }
+
+    private function additionalPermissionCheck(Query $query): bool
+    {
+        $usernames = explode(', ', $_ENV['TG_AVAILABLE_USERS']);
+        if (in_array($query->user->userName, $usernames, true)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function send(Message $message): void

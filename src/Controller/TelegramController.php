@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class TelegramController
 {
     public function __construct(
-        private readonly TelegramService $userAreaTgService
+        private readonly TelegramService $tgService
     ){}
 
     #[
@@ -23,16 +23,16 @@ class TelegramController
             methods: ["POST"]
         )
     ]
-    public function userAreaChannel(Request $request): Response
+    public function tgChannel(Request $request): Response
     {
         try {
-            $this->validatePermissions($request);
+            $this->validateTgPermissions($request);
 
             $query = Query::fromTgParams(
                 json_decode($request->getContent(), true)
             );
 
-            $this->userAreaTgService->handle($query);
+            $this->tgService->handle($query);
         } catch (BaseHttpException $exception) {
             return new Response($exception->getMessage());
         }
@@ -40,7 +40,7 @@ class TelegramController
         return new Response();
     }
 
-    private function validatePermissions(Request $request, string $area = 'USER_AREA'): void
+    private function validateTgPermissions(Request $request): void
     {
         $header = $request->headers->get('x-telegram-bot-api-secret-token');
         $secret = $_ENV['TG_SECRET'] ?? '';
