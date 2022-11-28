@@ -8,6 +8,7 @@ use DateTime;
 
 /**
  * @ORM\Entity()
+ * @ORM\Table(name="`order`")
  */
 class Order extends BaseEntity
 {
