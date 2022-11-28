@@ -19,6 +19,12 @@ class Order extends BaseEntity
     }
 
     /**
+     * @var Plan
+     * @ORM\ManyToOne(targetEntity=Plan::class, inversedBy="orders")
+     */
+    public Plan $plan;
+
+    /**
      * @ORM\Column(type="boolean", options={"default": 0})
      */
     public bool $isActive = false;
