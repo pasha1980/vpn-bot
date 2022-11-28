@@ -56,6 +56,7 @@ class TelegramService
             $this->send($exception->tgMessage);
         }
 
+        TgSessionRepository::saveQuery($query);
         TgSessionRepository::addProcessedQueries($query->id);
     }
 

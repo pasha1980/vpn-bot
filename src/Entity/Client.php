@@ -30,7 +30,7 @@ class Client extends BaseEntity
     /**
      * @ORM\Column(type="datetime")
      */
-    public \DateTimeInterface $date;
+    public \DateTime $date;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)

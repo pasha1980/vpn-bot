@@ -42,12 +42,6 @@ class Order extends BaseEntity
     public Instance $server;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer")
-     */
-    public int $deviceCount = 1;
-
-    /**
      * @var DateTime
      * @ORM\Column(type="date")
      */

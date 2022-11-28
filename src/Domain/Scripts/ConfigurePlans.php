@@ -42,7 +42,7 @@ class ConfigurePlans extends AbstractScript
 
         $this->deactivateExistingPlans();
 
-        $rows = explode('\n', $query->message);
+        $rows = explode("\n", $query->message);
         foreach ($rows as $index => $row) {
             $configurations = explode(':', $row);
             $daysCount = $configurations[0];

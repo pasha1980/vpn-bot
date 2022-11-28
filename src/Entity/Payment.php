@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Enum\PaymentStatus;
 use App\Enum\PaymentType;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints\DateTime;
+use DateTime;
 
 /**
  * @ORM\Entity()

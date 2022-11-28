@@ -42,7 +42,7 @@ class TelegramController
 
     private function validateTgPermissions(Request $request): void
     {
-        $header = $request->headers->get('x-telegram-bot-api-secret-token');
+        $header = $request->headers->get('x-telegram-bot-api-secret-token') ?? '';
         $secret = $_ENV['TG_SECRET'] ?? '';
         if ($secret !== $header) {
             throw new AccessDeniedHttpException();
