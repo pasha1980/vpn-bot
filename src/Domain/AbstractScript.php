@@ -30,7 +30,11 @@ abstract class AbstractScript
         try {
             (new Api($_ENV['TG_TOKEN']))->sendMessage([
                 'chat_id' => $message->chatId,
-                'text' => $message->message
+                'text' => $message->message,
+                'reply_markup' => [
+                    'keyboard' => $message->keyboardButtons,
+                    'inline_keyboard' => $message->inlineButtons
+                ]
             ]);
         } catch (TelegramSDKException $exception) {
             $this->logger->debug('Error while sending message', [
