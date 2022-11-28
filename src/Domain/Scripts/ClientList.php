@@ -27,12 +27,12 @@ class ClientList extends AbstractScript
 
     public function handle(Query $query): void
     {
-        /** @var Client $activeClients */
+        /** @var Client[] $activeClients */
         $activeClients = $this->em->getRepository(Client::class)->findBy([
             'isActive' => true
         ]);
 
-        /** @var Client $inactiveClients */
+        /** @var Client[] $inactiveClients */
         $inactiveClients = $this->em->getRepository(Client::class)->findBy([
             'isActive' => false
         ]);

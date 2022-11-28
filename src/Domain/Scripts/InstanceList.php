@@ -27,40 +27,43 @@ class InstanceList extends AbstractScript
 
     public function handle(Query $query): void
     {
-        /** @var Instance[] $instances */
-        $instances = $this->em->getRepository(Instance::class)->findAll();
+        /** @var Instance[] $activeInstances */
+        $activeInstances = $this->em->getRepository(Instance::class)->findBy([
+            'isActive' => true
+        ]);
 
-        if (count($instances) == 0) {
+        /** @var Instance[] $inactiveInstances */
+        $inactiveInstances = $this->em->getRepository(Instance::class)->findBy([
+            'isActive' => false
+        ]);
+
+        if (empty($activeInstances) && empty($inactiveInstances)) {
             $this->send(
                 new Message($query->chatId, 'No instances found :(')
             );
             return;
         }
 
-        $this->send(
-            new Message($query->chatId, 'Active instances:')
-        );
-        foreach ($instances as $instance) {
-            if (!$instance->isActive) {
-                continue;
-            }
-
+        if (!empty($activeInstances)) {
             $this->send(
-                new Message($query->chatId, $this->format($instance))
+                new Message($query->chatId, 'Active instances:')
             );
+            foreach ($activeInstances as $instance) {
+                $this->send(
+                    new Message($query->chatId, $this->format($instance))
+                );
+            }
         }
 
-        $this->send(
-            new Message($query->chatId, 'Inactive instances:')
-        );
-        foreach ($instances as $instance) {
-            if ($instance->isActive) {
-                continue;
-            }
-
+        if (!empty($inactiveInstances)) {
             $this->send(
-                new Message($query->chatId, $this->format($instance))
+                new Message($query->chatId, 'Inactive instances:')
             );
+            foreach ($inactiveInstances as $instance) {
+                $this->send(
+                    new Message($query->chatId, $this->format($instance))
+                );
+            }
         }
     }
 
