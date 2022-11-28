@@ -13,6 +13,7 @@ class Client extends BaseEntity
 {
     /**
      * @ORM\ManyToOne(targetEntity=Instance::class)
+     * @ORM\JoinColumn(name="server_id")
      */
     public Instance $instance;
 
