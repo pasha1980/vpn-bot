@@ -15,7 +15,6 @@ class Order extends BaseEntity
     {
         parent::__construct();
         $this->payments = new ArrayCollection();
-        $this->devices = new ArrayCollection();
     }
 
     /**
@@ -40,12 +39,6 @@ class Order extends BaseEntity
      * @ORM\Column(type="integer")
      */
     public int $deviceCount = 1;
-
-    /**
-     * @var iterable
-     * @ORM\OneToMany(targetEntity=Device::class, mappedBy="order")
-     */
-    public iterable $devices;
 
     /**
      * @var DateTime

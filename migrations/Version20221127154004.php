@@ -62,12 +62,17 @@ final class Version20221127154004 extends AbstractMigration
             "Migration can only be executed safely on '\Doctrine\DBAL\Platforms\MySQL80Platform'."
         );
 
+        $this->addSql('ALTER TABLE user ADD username VARCHAR(255) DEFAULT NULL;');
+
         $this->addSql('CREATE TABLE device (id INT AUTO_INCREMENT NOT NULL, order_id INT DEFAULT NULL, unique_hash VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, ip VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, deleted_at DATETIME DEFAULT NULL, INDEX IDX_92FB68E8D9F6D38 (order_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
         $this->abortIf(
             !$this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MySQL80Platform,
             "Migration can only be executed safely on '\Doctrine\DBAL\Platforms\MySQL80Platform'."
         );
 
+        $this->addSql('ALTER TABLE clients ADD user_id INT NULL;');
+        $this->addSql('ALTER TABLE clients ADD CONSTRAINT FK_C82E74A76ED395 FOREIGN KEY (user_id) REFERENCES user (id);');
+        $this->addSql('CREATE INDEX IDX_C82E74A76ED395 ON clients (user_id);');
     }
 
     public function down(Schema $schema): void

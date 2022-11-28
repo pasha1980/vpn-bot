@@ -24,9 +24,4 @@ class Plan extends BaseEntity
      */
     public float $price;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    public ?int $minimumDeviceCount;
-
 }

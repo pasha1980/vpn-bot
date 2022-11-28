@@ -15,6 +15,11 @@ class User extends BaseEntity
     public int $chatId;
 
     /**
+     * @ORM\Column(nullable=true)
+     */
+    public ?string $username;
+
+    /**
      * @var iterable
      * @ORM\OneToMany(targetEntity=Order::class, mappedBy="user")
      */

@@ -48,6 +48,6 @@ class Instance extends BaseEntity
 
     public function getAvailableServices(): array
     {
-        return \GuzzleHttp\json_decode($this->availableServices, true);
+        return json_decode($this->availableServices, true);
     }
 }
