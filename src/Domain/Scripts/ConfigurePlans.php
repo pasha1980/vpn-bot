@@ -53,10 +53,10 @@ class ConfigurePlans extends AbstractScript
 
             /** @var Plan $samePlan */
             $samePlan = $planRepo->findOneBy([
-                'daysCount' => $daysCount,
-                'price' => $price
+                'daysCount' => $daysCount
             ]);
             if ($samePlan !== null) {
+                $samePlan->price = $price;
                 $samePlan->isActive = true;
                 $this->em->persist($samePlan);
                 continue;
@@ -70,6 +70,9 @@ class ConfigurePlans extends AbstractScript
         }
 
         $this->em->flush();
+        $this->send(
+            new Message($query->chatId, 'Success!')
+        );
     }
 
     private function deactivateExistingPlans(): void
@@ -88,7 +91,7 @@ class ConfigurePlans extends AbstractScript
         $this->em->flush();
     }
 
-    private const INSTRUCTION = "Please, send new plans in next format: {days}:{price}\n For example:\n30:500\n120:1500";
+    private const INSTRUCTION = "Please, send new plans in next format: {days}:{price}\nFor example:\n30:500\n120:1500";
 
     private function sendInstructions(int $chatId): void
     {
