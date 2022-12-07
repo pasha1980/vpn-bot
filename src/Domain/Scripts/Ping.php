@@ -24,8 +24,9 @@ class Ping extends AbstractScript
 
     public function handle(Query $query): void
     {
-        $this->send(
+        $this->sendMessage(
             new Message($query->chatId, 'PONG')
         );
+        $query->finished = true;
     }
 }

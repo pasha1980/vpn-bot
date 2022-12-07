@@ -38,33 +38,36 @@ class InstanceList extends AbstractScript
         ]);
 
         if (empty($activeInstances) && empty($inactiveInstances)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'No instances found :(')
             );
+            $query->finished = true;
             return;
         }
 
         if (!empty($activeInstances)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Active instances:')
             );
             foreach ($activeInstances as $instance) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->format($instance))
                 );
             }
         }
 
         if (!empty($inactiveInstances)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Inactive instances:')
             );
             foreach ($inactiveInstances as $instance) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->format($instance))
                 );
             }
         }
+
+        $query->finished = true;
     }
 
     private const FORMAT = '

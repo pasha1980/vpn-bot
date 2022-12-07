@@ -35,8 +35,10 @@ class TotalIncome extends AbstractScript
             ->setParameter('status_success', PaymentStatus::success)
             ->getQuery()->getResult()[0]['income'];
 
-        $this->send(
+        $this->sendMessage(
             new Message($query->chatId, $income)
         );
+
+        $query->finished = true;
     }
 }

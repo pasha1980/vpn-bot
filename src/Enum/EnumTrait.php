@@ -13,4 +13,15 @@ trait EnumTrait
             static::cases()
         );
     }
+
+    public static function exist($value): bool
+    {
+        try {
+            static::from($value);
+        } catch (\Throwable $exception) {
+            return false;
+        }
+
+        return true;
+    }
 }

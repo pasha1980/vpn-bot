@@ -30,16 +30,19 @@ class CustomerList extends AbstractScript
         $customers = $this->em->getRepository(User::class)->findAll();
 
         if (empty($customers)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'No customers found :-(')
             );
+            $query->finished = true;
+            return;
         }
 
         foreach ($customers as $customer) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, $this->formatCustomer($customer))
             );
         }
+        $query->finished = true;
     }
 
     private const FORMAT_CUSTOMER = 'Customer #%s

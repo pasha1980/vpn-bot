@@ -16,12 +16,21 @@ class Query
 
     public bool $isInit = false;
 
+    public int $step = 0;
+
     public ?string $uniqueHash = null;
 
     public ?self $previousQuery = null;
 
+    public bool $finished = false;
+
     public static function fromTgParams(array $params): self
     {
+        $previousQuery = TgSessionRepository::getPreviousQuery($params['message']['chat']['id']);
+        if ($previousQuery !== null && $previousQuery->finished) {
+            $previousQuery = null;
+        }
+
         $message = $params['message'];
 
         $query = new self;
@@ -31,11 +40,15 @@ class Query
         $query->message = str_replace('\\', '', $message['text']);
         $query->isInit = str_starts_with($query->message, '/');
 
-        if (!$query->isInit) {
-            $query->previousQuery = TgSessionRepository::getPreviousQuery($query->chatId);
+        if (!$query->isInit && $previousQuery !== null) {
+            $query->previousQuery = $previousQuery;
+            $query->step = $previousQuery->step + 1;
+            $query->finished = $previousQuery->finished;
         } else {
-            $query->uniqueHash = self::generateHash($query);
+            $query->step = 0;
         }
+
+        $query->uniqueHash = self::generateHash($query);
 
         return $query;
     }
@@ -47,7 +60,7 @@ class Query
 
     public function getHash(): string
     {
-        return $this->getInitialQuery()->uniqueHash;
+        return $this->uniqueHash;
     }
 
     public static function fromJson(string $json): self
@@ -65,6 +78,8 @@ class Query
         $query->message = $array['message'];
         $query->isInit = (bool)$array['isInit'];
         $query->user = User::fromArray($array['user']);
+        $query->step = $array['step'];
+        $query->finished = $array['finished'];
 
         if (isset($array['previousQuery'])) {
             $query->previousQuery = self::fromArray($array['previousQuery']);
@@ -85,7 +100,9 @@ class Query
             'chatId' => $this->chatId,
             'message' => $this->message,
             'isInit' => $this->isInit,
-            'user' => $this->user->toArray()
+            'user' => $this->user->toArray(),
+            'step' => $this->step,
+            'finished' => $this->finished
         ];
 
         if ($this->previousQuery !== null) {

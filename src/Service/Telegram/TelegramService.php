@@ -37,11 +37,16 @@ class TelegramService
             return;
         }
 
+        if ($query->finished) {
+            return;
+        }
+
         $processedQueries = TgSessionRepository::getProcessedQueries();
         if (in_array($query->id, $processedQueries)) {
             throw new ProcessedQueryHttpException();
         }
 
+        $withException = false;
         try {
             $this->logger->debug('Got query', [
                 'query' => $query,
@@ -49,14 +54,17 @@ class TelegramService
             ]);
 
             $handler = $this->getHandler($query);
-            if ($handler !== null) {
-                $handler($query);
-            }
+            $handler?->handle($query);
+
         } catch (BaseException $exception) {
+            $withException = true;
             $this->send($exception->tgMessage);
         }
 
-        TgSessionRepository::saveQuery($query);
+        if (!$withException) {
+            TgSessionRepository::saveQuery($query);
+        }
+
         TgSessionRepository::addProcessedQueries($query->id);
     }
 
@@ -90,7 +98,7 @@ class TelegramService
         ]);
     }
 
-    private function getHandler(Query $query): ?callable
+    private function getHandler(Query $query): ?AbstractScript
     {
         $path = $this->rootDir . '/src/Domain/Scripts';
         $finder = new Finder();
@@ -114,11 +122,7 @@ class TelegramService
                 continue;
             }
 
-            $container = $this->container;
-            return function (Query $query) use ($class, $container) {
-                $script = $container->get($class);
-                $script->handle($query);
-            };
+            return $this->container->get($class);
         }
 
         throw new ScriptNotFoundException($query->chatId);

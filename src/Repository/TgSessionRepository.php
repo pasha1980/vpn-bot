@@ -68,7 +68,7 @@ class TgSessionRepository
         $data = self::connection()->get(
             sprintf(self::REDIS_ADDITIONAL_DATA_KEY_FORMAT, $query->getHash())
         );
-        return json_decode(base64_decode($data), true);
+        return json_decode(base64_decode($data), true) ?? [];
     }
 
     public static function saveQueryData(Query $query, array $data = []): void

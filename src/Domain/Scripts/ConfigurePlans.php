@@ -33,7 +33,7 @@ class ConfigurePlans extends AbstractScript
             return;
         }
 
-        $this->configurePlans($query);
+        $this->configurePlans($query);;
     }
 
     private function configurePlans(Query $query): void
@@ -70,9 +70,11 @@ class ConfigurePlans extends AbstractScript
         }
 
         $this->em->flush();
-        $this->send(
+        $this->sendMessage(
             new Message($query->chatId, 'Success!')
         );
+
+        $query->finished = true;
     }
 
     private function deactivateExistingPlans(): void
@@ -95,7 +97,7 @@ class ConfigurePlans extends AbstractScript
 
     private function sendInstructions(int $chatId): void
     {
-        $this->send(
+        $this->sendMessage(
             new Message($chatId, self::INSTRUCTION)
         );
     }

@@ -38,35 +38,38 @@ class ClientList extends AbstractScript
         ]);
 
         if (empty($activeClients) && empty($inactiveClients)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'No clients found')
             );
+            $query->finished = true;
             return;
         }
 
         if (!empty($activeClients)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Active clients:')
             );
 
             foreach ($activeClients as $client) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->formatClient($client))
                 );
             }
         }
 
         if (!empty($inactiveClients)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Inactive clients:')
             );
 
             foreach ($inactiveClients as $client) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->formatClient($client))
                 );
             }
         }
+
+        $query->finished = true;
     }
 
     private const CLIENT_FORMAT = 'Client #%s

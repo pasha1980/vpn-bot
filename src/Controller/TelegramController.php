@@ -6,6 +6,7 @@ use App\Domain\Entity\Query;
 use App\Exception\AccessDeniedHttpException;
 use App\Exception\BaseHttpException;
 use App\Service\Telegram\TelegramService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,7 +14,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class TelegramController
 {
     public function __construct(
-        private readonly TelegramService $tgService
+        private readonly TelegramService $tgService,
+        private readonly LoggerInterface $logger
     ){}
 
     #[
@@ -34,6 +36,10 @@ class TelegramController
 
             $this->tgService->handle($query);
         } catch (BaseHttpException $exception) {
+            $this->logger->error($exception);
+            return new Response($exception->getMessage());
+        } catch (\Throwable $exception) {
+            $this->logger->error($exception);
             return new Response($exception->getMessage());
         }
 

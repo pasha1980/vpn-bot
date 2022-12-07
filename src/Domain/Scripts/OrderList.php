@@ -38,35 +38,38 @@ class OrderList extends AbstractScript
         ]);
 
         if (empty($activeOrders) && empty($inactiveOrders)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Not order found :-(')
             );
+            $query->finished = true;
             return;
         }
 
         if (!empty($activeOrders)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Active orders:')
             );
 
             foreach ($activeOrders as $order) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->formatOrder($order))
                 );
             }
         }
 
         if (!empty($inactiveOrders)) {
-            $this->send(
+            $this->sendMessage(
                 new Message($query->chatId, 'Active orders:')
             );
 
             foreach ($inactiveOrders as $order) {
-                $this->send(
+                $this->sendMessage(
                     new Message($query->chatId, $this->formatOrder($order))
                 );
             }
         }
+
+        $query->finished = true;
     }
 
     private const FORMAT_ORDER = 'Order #%s
