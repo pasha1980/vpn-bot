@@ -43,7 +43,7 @@ class GenerateClientScript extends AbstractScript
         switch ($stage) {
 
             case null:
-                $this->init($query);
+                $this->start($query);
                 break;
 
             case self::STAGE_CHOOSING_SERVICE;
@@ -61,7 +61,7 @@ class GenerateClientScript extends AbstractScript
         TgSessionRepository::saveQueryData($query, $this->queryData);
     }
 
-    private function init(Query $query): void
+    private function start(Query $query): void
     {
         $availableServices = VpnService::cases();
         if (empty($availableServices)) {
@@ -91,50 +91,8 @@ class GenerateClientScript extends AbstractScript
             return;
         }
 
-        $activeInstances = $this->em->createQueryBuilder()
-            ->select('o')
-            ->from(Instance::class, 'o')
-            ->where('o.isActive = true')
-            ->andWhere('o.availableServices LIKE :service')
-            ->setParameter('service', '%' . $this->service->value . '%')
-            ->getQuery()->getResult();
-
-        if (empty($activeInstances)) {
-            $this->sendMessage(
-                new Message($query->chatId, 'We have no active instances, that support ' . $this->service->value)
-            );
-            return;
-        }
-
-        if (count($activeInstances) === 1) {
-            $this->instance = $activeInstances[0];
-            $this->sendMessage(new Message(
-                $query->chatId, 'I will choose next instance'
-            ));
-            $this->sendMessage(new Message(
-                $query->chatId, $this->formatInstance($this->instance)
-            ));
-        } else {
-            foreach ($activeInstances as $instance) {
-                $this->sendMessage(new Message(
-                    $query->chatId, $this->formatInstance($instance)
-                ));
-            }
-
-            $this->sendMessage(
-                new Message(
-                    chatId: $query->chatId,
-                    message: 'Please, choose instance',
-                    keyboardButtons: array_map(
-                        function (Instance $instance) {
-                            return '#' . $instance->id;
-                        },
-                        $activeInstances
-                    )
-                )
-            );
-
-            $this->queryData['stage'] = self::STAGE_CHOOSING_INSTANCE;
+        $this->selectInstance($query);
+        if ($this->instance === null) {
             return;
         }
 
@@ -155,50 +113,8 @@ class GenerateClientScript extends AbstractScript
 
         $this->service = VpnService::from($service);
 
-        $activeInstances = $this->em->createQueryBuilder()
-            ->select('o')
-            ->from(Instance::class, 'o')
-            ->where('o.isActive = true')
-            ->andWhere('o.availableServices LIKE :service')
-            ->setParameter('service', '%' . $this->service->value . '%')
-            ->getQuery()->getResult();
-
-        if (empty($activeInstances)) {
-            $this->sendMessage(
-                new Message($query->chatId, 'We have no active instances, that support ' . $this->service->value)
-            );
-            return;
-        }
-
-        if (count($activeInstances) === 1) {
-            $this->instance = $activeInstances[0];
-            $this->sendMessage(new Message(
-                $query->chatId, 'I will choose next instance'
-            ));
-            $this->sendMessage(new Message(
-                $query->chatId, $this->formatInstance($this->instance)
-            ));
-        } else {
-            foreach ($activeInstances as $instance) {
-                $this->sendMessage(new Message(
-                    $query->chatId, $this->formatInstance($instance)
-                ));
-            }
-
-            $this->sendMessage(
-                new Message(
-                    chatId: $query->chatId,
-                    message: 'Please, choose instance',
-                    keyboardButtons: array_map(
-                        function (Instance $instance) {
-                            return '#' . $instance->id;
-                        },
-                        $activeInstances
-                    )
-                )
-            );
-
-            $this->queryData['stage'] = self::STAGE_CHOOSING_INSTANCE;
+        $this->selectInstance($query);
+        if ($this->instance === null) {
             return;
         }
 
@@ -223,6 +139,57 @@ class GenerateClientScript extends AbstractScript
         $this->generateClient($query);
         $this->queryData = [];
         $query->finished = true;
+    }
+
+    private function selectInstance(Query $query): void
+    {
+        $activeInstances = $this->em->createQueryBuilder()
+            ->select('o')
+            ->from(Instance::class, 'o')
+            ->where('o.isActive = true')
+            ->andWhere('o.availableServices LIKE :service')
+            ->setParameter('service', '%' . $this->service->value . '%')
+            ->getQuery()->getResult();
+
+        if (empty($activeInstances)) {
+            $this->sendMessage(
+                new Message($query->chatId, 'We have no active instances, that support ' . $this->service->value)
+            );
+            $this->queryData = [];
+            return;
+        }
+
+        if (count($activeInstances) === 1) {
+            $this->instance = $activeInstances[0];
+            $this->sendMessage(new Message(
+                $query->chatId, 'I will choose next instance'
+            ));
+            $this->sendMessage(new Message(
+                $query->chatId, $this->formatInstance($this->instance)
+            ));
+            $this->queryData['stage'] = self::STAGE_CLIENT_GENERATING;
+        } else {
+            foreach ($activeInstances as $instance) {
+                $this->sendMessage(new Message(
+                    $query->chatId, $this->formatInstance($instance)
+                ));
+            }
+
+            $this->sendMessage(
+                new Message(
+                    chatId: $query->chatId,
+                    message: 'Please, choose instance',
+                    keyboardButtons: array_map(
+                        function (Instance $instance) {
+                            return '#' . $instance->id;
+                        },
+                        $activeInstances
+                    )
+                )
+            );
+
+            $this->queryData['stage'] = self::STAGE_CHOOSING_INSTANCE;
+        }
     }
 
     private function generateClient(Query $query): void
