@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Enum\QueryType;
 use App\Repository\TgSessionRepository;
 
 class Query
@@ -24,8 +25,12 @@ class Query
 
     public bool $finished = false;
 
+    public QueryType $type = QueryType::MESSAGE;
+
     public static function fromTgParams(array $params): self
     {
+        // todo: Callback query building
+
         $previousQuery = TgSessionRepository::getPreviousQuery($params['message']['chat']['id']);
         if ($previousQuery !== null && $previousQuery->finished) {
             $previousQuery = null;

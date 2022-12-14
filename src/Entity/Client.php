@@ -37,4 +37,10 @@ class Client extends BaseEntity
      * @ORM\JoinColumn(nullable=true)
      */
     public ?User $user = null;
+
+    public function setService(string $service): self
+    {
+        $this->service = VpnService::from($service);
+        return $this;
+    }
 }

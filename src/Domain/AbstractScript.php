@@ -2,9 +2,11 @@
 
 namespace App\Domain;
 
+use App\Domain\Entity\Button;
 use App\Domain\Entity\File;
 use App\Domain\Entity\Message;
 use App\Domain\Entity\Query;
+use App\Enum\ButtonType;
 use App\Kernel;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -32,26 +34,59 @@ abstract class AbstractScript
     protected function sendMessage(Message $message): void
     {
         // todo: Buttons...
+        $url = sprintf('https://api.telegram.org/bot%s/sendMessage', $_ENV['TG_TOKEN']);
 
-        $url = 'https://api.telegram.org/bot%s/sendMessage';
-        $url = sprintf($url, $_ENV['TG_TOKEN']);
+        $data = [
+            'chat_id' => $message->chatId,
+            'text' => $message->message,
+            'reply_markup' => []
+        ];
+
+        if (!empty($message->keyboardButtons)) {
+            $data['reply_markup']['keyboard'] = [
+                array_map(
+                    function (string $text) {
+                        return [
+                            'text' => $text
+                        ];
+                    },
+                    $message->keyboardButtons
+                )
+            ];
+        } else {
+            $data['reply_markup']['remove_keyboard'] = true;
+        }
+
+        if (!empty($message->inlineButtons)) {
+            $data['reply_markup']['inline_keyboard'] = [
+                array_map(
+                    function (Button $button) {
+                        $data = [
+                            'text' => $button,
+                        ];
+
+                        switch ($button->type) {
+                            case ButtonType::CALLBACK:
+                                $data['callback_data'] = $button->data;
+                                break;
+
+                            case ButtonType::URL:
+                                $data['url'] = $button->data;
+                                break;
+
+                            case ButtonType::WEB_APP:
+                                $data['web_app'] = $button->data;
+                        }
+
+                        return $data;
+                    },
+                    $message->inlineButtons
+                )
+            ];
+        }
 
         try {
-            $client = new Client();
-            $response = $client->post($url, [
-                'json' => [
-                    'chat_id' => $message->chatId,
-                    'text' => $message->message,
-                    'reply_markup' => [
-                        'keyboard' => [array_map(function ($data) {
-                            return [
-                                'text' => $data
-                            ];
-                        }, $message->keyboardButtons)],
-//                        'inline_keyboard' => $message->inlineButtons
-                    ]
-                ]
-            ]);
+            (new Client())->post($url, ['json' => $data]);
         } catch (GuzzleException $exception) {
             $this->logger->info('Error while sending message', [
                 'exception' => $exception
